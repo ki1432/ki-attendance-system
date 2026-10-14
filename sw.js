@@ -1,8 +1,7 @@
-const CACHE_NAME = 'ki-attendance-v4';
+const CACHE_NAME = 'ki-attendance-v5';
 const assetsToCache = [
   './',
   './index.html',
-  './manifest.json',
   'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2',
   'https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'
@@ -11,9 +10,14 @@ const assetsToCache = [
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(assetsToCache);
+      return cache.addAll(assetsToCache).catch(err => console.log('Cache asset skipped:', err));
     })
   );
+  self.skipWaiting();
+});
+
+self.addEventListener('activate', (event) => {
+  event.waitUntil(clients.claim());
 });
 
 self.addEventListener('fetch', (event) => {
