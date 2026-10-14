@@ -141,14 +141,13 @@
 
     <!-- Scripts & Logic -->
     <script>
-        // تسجيل Service Worker بأمان
+        // تسجيل Service Worker بأمان تام
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js').catch(() => {});
             });
         }
 
-        // إعدادات Supabase (يمكن ربطها مباشرة هنا عند توفر الروابط)
         const SUPABASE_URL = ''; 
         const SUPABASE_ANON_KEY = '';
         let supabase = null;
@@ -223,27 +222,24 @@
             }
         }
 
-        // دالة عرض وتصفية الجدول بذكاء وسرعة فائقة
         function renderTable() {
             try {
                 const tbody = document.getElementById('tableBody');
                 if (!tbody) return;
                 tbody.innerHTML = '';
 
-                const searchQuery = document.getElementById('searchInput').value.trim().toLowerCase();
+                const searchInput = document.getElementById('searchInput');
+                const searchQuery = searchInput ? searchInput.value.trim().toLowerCase() : '';
                 
                 let totalWarnings = 0;
                 let totalDropped = 0;
                 let totalPresenceSum = 0;
-                let visibleCount = 0;
                 let totalPossibleMarks = studentsData.length * 8;
 
                 studentsData.forEach((student, index) => {
-                    // تطبيق محرك البحث الحي
                     if (searchQuery && !student.name.toLowerCase().includes(searchQuery) && !student.code.includes(searchQuery)) {
                         return;
                     }
-                    visibleCount++;
 
                     const presentCount = student.weeks.reduce((a, b) => a + b, 0);
                     const absentCount = 8 - presentCount;
@@ -342,7 +338,6 @@
                 const { error } = await supabase.from('attendance_records').upsert(queue, { onConflict: 'student_code,subject,lecture_type,week_index' });
                 if (!error) {
                     localStorage.removeItem('ki_offline_queue');
-                    console.log('Synced successfully!');
                 }
             }
         }
@@ -365,9 +360,17 @@
             document.body.removeChild(a);
         }
 
-        // تشغيل مباشر ومضمون فور تحميل سكريبت المتصفح
-        renderTable();
-        updateTheme();
+        // تشغيل آمن ومضمون فور جاهزية المستند بالكامل
+        function initSystem() {
+            renderTable();
+            updateTheme();
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initSystem);
+        } else {
+            initSystem();
+        }
     </script>
 </body>
 </html>
