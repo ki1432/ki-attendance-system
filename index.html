@@ -6,7 +6,6 @@
     <title>نظام غيابات المرحلة الثانية - تقنيات التخدير | Ki-ATTEND</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- استدعاء مكتبة Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap');
@@ -23,7 +22,7 @@
                     <i class="fa-solid fa-user-shield"></i>
                 </div>
                 <h2 class="text-xl font-bold text-white">تسجيل الدخول - Ki-ATTEND</h2>
-                <p class="text-xs text-gray-400 mt-1">يرجى إدخال اسم المستخدم وكلمة المرور للمتابعة</p>
+                <p class="text-xs text-gray-400 mt-1">يرجى إدخال بيانات المشرف للمتابعة</p>
             </div>
             <form onsubmit="handleLogin(event)" class="space-y-4">
                 <div>
@@ -44,7 +43,7 @@
         </div>
     </div>
 
-    <!-- ➕ نافذة (Modal) إضافة مشرف جديد -->
+    <!-- ➕ نافذة إضافة مشرف جديد -->
     <div id="addAdminModal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 hidden">
         <div class="bg-gray-800 border border-gray-700 rounded-2xl p-6 w-full max-w-sm shadow-2xl">
             <div class="flex justify-between items-center mb-4">
@@ -55,7 +54,7 @@
             </div>
             <form onsubmit="handleAddAdmin(event)" class="space-y-4">
                 <div>
-                    <label class="block text-xs font-semibold text-gray-300 mb-1">اسم المستخدم الجديد</label>
+                    <label class="block text-xs font-semibold text-gray-300 mb-1">اسم المستخدم</label>
                     <input type="text" id="newAdminUsername" required placeholder="اسم المشرف..." 
                            class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500">
                 </div>
@@ -66,7 +65,7 @@
                 </div>
                 <p id="adminModalMsg" class="text-xs hidden font-semibold text-center"></p>
                 <div class="flex gap-2">
-                    <button type="submit" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-2 rounded-lg text-xs transition">حفظ المشرف</button>
+                    <button type="submit" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-2 rounded-lg text-xs transition">حفظ</button>
                     <button type="button" onclick="closeAddAdminModal()" class="bg-gray-700 hover:bg-gray-600 text-gray-200 font-bold px-4 py-2 rounded-lg text-xs">إلغاء</button>
                 </div>
             </form>
@@ -75,19 +74,17 @@
 
     <!-- Header -->
     <header class="bg-gray-800 border-b border-gray-700 shadow-lg p-4">
-        <div class="container mx-auto flex flex-col lg:flex-row justify-between items-center gap-4">
+        <div class="container mx-auto flex flex-col xl:flex-row justify-between items-center gap-4">
             <div>
-                <h1 class="text-base lg:text-lg font-bold text-white">كلية التقنيات الصحية والطبية - قسم تقنيات التخدير (المرحلة الثانية)</h1>
+                <h1 class="text-base lg:text-lg font-bold text-white">كلية التقنيات الصحية والطبية - تقنيات التخدير (المرحلة الثانية)</h1>
                 <p class="text-xs text-blue-400 font-semibold">System Architect & Developer: ki | © 2026 All Rights Reserved</p>
             </div>
-            <div class="flex flex-wrap items-center gap-3">
+            <div class="flex flex-wrap items-center gap-2">
                 <div id="connection-status" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-green-600 text-white shadow">
-                    متصل (Online)
+                    متصل
                 </div>
-                <button id="addAdminBtn" onclick="openAddAdminModal()" class="hidden bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 shadow">
-                    <i class="fa-solid fa-user-plus"></i> إضافة مشرف
-                </button>
-                <select id="subjectSelect" class="bg-gray-700 border border-gray-600 rounded-lg px-3 py-1.5 text-xs text-white">
+                <!-- اختيار المادة -->
+                <select id="subjectSelect" class="bg-gray-700 border border-gray-600 rounded-lg px-3 py-1.5 text-xs text-white font-medium">
                     <option>Basic of Anesthesia (1)</option>
                     <option>Basic of Anesthesia Equipments (1)</option>
                     <option>Basic of Surgery (1)</option>
@@ -97,13 +94,21 @@
                     <option>Computer & AI (نظري فقط)</option>
                     <option>جرائم البعث</option>
                 </select>
+                <!-- نوع المحاضرة (نظري / عملي A / عملي B) -->
                 <select id="lectureTypeSelect" onchange="renderTable()" class="bg-gray-700 border border-gray-600 rounded-lg px-3 py-1.5 text-xs font-bold text-white">
                     <option value="theory">🟠 نظري (المرحلة كاملة)</option>
-                    <option value="g1">🟡 عملي - Group 1</option>
-                    <option value="g2">🟡 عملي - Group 2</option>
+                    <option value="g1">🟡 عملي - Group A</option>
+                    <option value="g2">🟡 عملي - Group B</option>
                 </select>
+                <!-- اختيار الأسبوع (من 1 إلى 15) -->
+                <select id="weekSelect" onchange="renderTable()" class="bg-gray-700 border border-gray-600 rounded-lg px-3 py-1.5 text-xs font-bold text-blue-400">
+                    <!-- سيتم تعبئتها ديناميكياً بـ 15 أسبوعاً -->
+                </select>
+                <button id="addAdminBtn" onclick="openAddAdminModal()" class="hidden bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 shadow">
+                    <i class="fa-solid fa-user-plus"></i> مشرف
+                </button>
                 <button onclick="exportToCSV()" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 shadow">
-                    <i class="fa-solid fa-file-excel"></i> تصدير Excel
+                    <i class="fa-solid fa-file-excel"></i> تصدير
                 </button>
                 <button onclick="handleLogout()" class="bg-red-600/80 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 shadow">
                     <i class="fa-solid fa-right-from-bracket"></i> خروج
@@ -113,28 +118,9 @@
     </header>
 
     <!-- Main Content -->
-    <main class="container mx-auto px-4 py-8 flex-grow">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <div class="bg-gray-800 p-4 rounded-xl border border-gray-700 shadow-sm">
-                <p class="text-sm text-gray-400">إجمالي الطلبة في السجل</p>
-                <h3 class="text-2xl font-bold mt-1 text-white" id="totalStudents">181</h3>
-            </div>
-            <div class="bg-gray-800 p-4 rounded-xl border border-gray-700 shadow-sm">
-                <p class="text-sm text-gray-400">متوسط نسب الحضور العامة</p>
-                <h3 class="text-2xl font-bold mt-1 text-green-400" id="avgAttendance">100%</h3>
-            </div>
-            <div class="bg-gray-800 p-4 rounded-xl border border-gray-700 shadow-sm">
-                <p class="text-sm text-gray-400">الطلاب في خطر الإنذار</p>
-                <h3 class="text-2xl font-bold mt-1 text-yellow-400" id="warningCount">0</h3>
-            </div>
-            <div class="bg-gray-800 p-4 rounded-xl border border-gray-700 shadow-sm">
-                <p class="text-sm text-gray-400">الطلاب المحرومون</p>
-                <h3 class="text-2xl font-bold mt-1 text-red-400" id="droppedCount">0</h3>
-            </div>
-        </div>
-
+    <main class="container mx-auto px-4 py-6 flex-grow">
         <!-- Live Search -->
-        <div class="mb-6 bg-gray-800 p-4 rounded-xl border border-gray-700 shadow flex items-center gap-3">
+        <div class="mb-4 bg-gray-800 p-3 rounded-xl border border-gray-700 shadow flex items-center gap-3">
             <i class="fa-solid fa-magnifying-glass text-blue-400"></i>
             <input type="text" id="searchInput" oninput="renderTable()" placeholder="ابحث عن اسم الطالب أو الكود الجامعي..." 
                    class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-sm text-white focus:outline-none focus:border-blue-500">
@@ -144,22 +130,19 @@
         <div class="bg-gray-800 rounded-2xl border border-gray-700 shadow-xl overflow-hidden">
             <div class="p-4 border-b border-gray-700 bg-orange-900/30 flex justify-between items-center">
                 <h2 class="text-base font-bold flex items-center gap-2">
-                    <i class="fa-solid fa-table-cells text-orange-400"></i> سجل المتابعة الأسبوعية
+                    <i class="fa-solid fa-table-cells text-orange-400"></i> سجل حضور الغياب المباشر (الأسبوع المحدد)
                 </h2>
                 <span id="currentUserBadge" class="text-xs font-mono text-blue-400 bg-blue-950/80 px-3 py-1 rounded-lg border border-blue-800/50"></span>
             </div>
-            <div class="overflow-x-auto max-h-[550px] overflow-y-auto">
+            <div class="overflow-x-auto max-h-[600px] overflow-y-auto">
                 <table class="w-full text-right border-collapse">
                     <thead class="sticky top-0 bg-gray-700 z-10 text-gray-300 text-xs uppercase">
                         <tr>
                             <th class="p-3 text-center w-16">#</th>
                             <th class="p-3">الكود</th>
                             <th class="p-3">اسم الطالب الثلاثي</th>
-                            <th class="p-3 text-center" colspan="8">الأسابيع (1-8)</th>
-                            <th class="p-3 text-center">حضور</th>
-                            <th class="p-3 text-center">غياب</th>
-                            <th class="p-3 text-center">النسبة</th>
-                            <th class="p-3 text-center">الموقف</th>
+                            <th class="p-3 text-center">المجموعة</th>
+                            <th class="p-3 text-center bg-red-950/50 text-red-300">تسجيل غياب (ضع صح للغائب)</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-700 text-sm" id="tableBody"></tbody>
@@ -168,7 +151,7 @@
         </div>
     </main>
 
-    <footer class="bg-gray-800 border-t border-gray-700 py-4 text-center text-xs text-gray-400">
+    <footer class="bg-gray-800 border-t border-gray-700 py-3 text-center text-xs text-gray-400">
         <p>Ki Integrated Attendance System &bull; Developed by <span class="text-blue-400 font-bold">ki</span> &bull; © 2026</p>
     </footer>
 
@@ -185,7 +168,15 @@
             console.log('Local Mode Active', e);
         }
 
-        // إدارة الجلسة وتسجيل الدخول
+        // تعبئة قائمة الأسابيع الـ 15
+        const weekSelect = document.getElementById('weekSelect');
+        for (let i = 1; i <= 15; i++) {
+            const opt = document.createElement('option');
+            opt.value = i;
+            opt.innerText = `الأسبوع ${i}`;
+            weekSelect.appendChild(opt);
+        }
+
         let currentUser = JSON.parse(sessionStorage.getItem('ki_user') || 'null');
 
         function checkAuth() {
@@ -197,9 +188,7 @@
                 loginScreen.classList.remove('hidden');
             } else {
                 loginScreen.classList.add('hidden');
-                if (currentUserBadge) currentUserBadge.innerText = `المشرف الحالي: ${currentUser.username}`;
-                
-                // زر إضافة المشرفين يظهر فقط للحساب الرئيسي KI
+                if (currentUserBadge) currentUserBadge.innerText = `المشرف: ${currentUser.username}`;
                 if (currentUser.username.toUpperCase() === 'KI' && addAdminBtn) {
                     addAdminBtn.classList.remove('hidden');
                 } else if (addAdminBtn) {
@@ -213,10 +202,8 @@
             const userIn = document.getElementById('loginUsername').value.trim();
             const passIn = document.getElementById('loginPassword').value.trim();
             const errEl = document.getElementById('loginError');
-
             errEl.classList.add('hidden');
 
-            // 1. التحقق السريع من حساب KI الرئيسي
             if (userIn.toUpperCase() === 'KI' && passIn === '211621') {
                 currentUser = { username: 'KI', role: 'super_admin' };
                 sessionStorage.setItem('ki_user', JSON.stringify(currentUser));
@@ -224,7 +211,6 @@
                 return;
             }
 
-            // 2. التحقق من بقية المشرفين عبر Supabase
             if (supabaseClient) {
                 const { data, error } = await supabaseClient
                     .from('app_admins')
@@ -240,7 +226,6 @@
                     return;
                 }
             }
-
             errEl.innerText = "اسم المستخدم أو كلمة المرور غير صحيحة!";
             errEl.classList.remove('hidden');
         }
@@ -251,7 +236,6 @@
             checkAuth();
         }
 
-        // نافذة إضافة مشرف جديد
         function openAddAdminModal() { document.getElementById('addAdminModal').classList.remove('hidden'); }
         function closeAddAdminModal() { document.getElementById('addAdminModal').classList.add('hidden'); }
 
@@ -261,43 +245,31 @@
             const newP = document.getElementById('newAdminPassword').value.trim();
             const msgEl = document.getElementById('adminModalMsg');
 
-            if (!supabaseClient) {
-                alert("Supabase غير متصل حالياً!");
-                return;
-            }
-
-            const { error } = await supabaseClient
-                .from('app_admins')
-                .insert([{ username: newU, password: newP, role: 'admin' }]);
-
+            if (!supabaseClient) return;
+            const { error } = await supabaseClient.from('app_admins').insert([{ username: newU, password: newP, role: 'admin' }]);
             msgEl.classList.remove('hidden');
             if (error) {
-                msgEl.innerText = "فشل الإضافة! قد يكون الاسم مكرراً.";
+                msgEl.innerText = "فشل الإضافة أو الاسم مكرر";
                 msgEl.className = "text-xs font-semibold text-center text-red-400";
             } else {
-                msgEl.innerText = "تمت إضافة المشرف بنجاح!";
+                msgEl.innerText = "تمت الإضافة بنجاح!";
                 msgEl.className = "text-xs font-semibold text-center text-green-400";
-                setTimeout(() => {
-                    closeAddAdminModal();
-                    document.getElementById('newAdminUsername').value = '';
-                    document.getElementById('newAdminPassword').value = '';
-                    msgEl.classList.add('hidden');
-                }, 1200);
+                setTimeout(() => { closeAddAdminModal(); document.getElementById('newAdminUsername').value=''; document.getElementById('newAdminPassword').value=''; msgEl.classList.add('hidden'); }, 1200);
             }
         }
 
-        function updateConnectionStatus(msg, isOnline) {
-            const statusEl = document.getElementById('connection-status');
-            if (statusEl) {
-                statusEl.innerText = msg;
-                statusEl.className = isOnline 
-                    ? "px-3 py-1.5 rounded-lg text-xs font-semibold bg-green-600 text-white shadow" 
-                    : "px-3 py-1.5 rounded-lg text-xs font-semibold bg-yellow-600 text-white shadow";
-            }
-        }
-
-        window.addEventListener('online', () => { updateConnectionStatus("متصل (Online)", true); syncOfflineQueue(); });
-        window.addEventListener('offline', () => updateConnectionStatus("غير متصل (Offline)", false));
+        // قائمة أكواد مجموعة A الرسمية (المستخرجة من القوائم)
+        const groupACodes = [
+            "2026263", "2026264", "2026265", "2026266", "2026268", "2026271", "2026272", "2026275", "2026279", "2026281", 
+            "2026282", "2026284", "2026285", "2026286", "2026287", "2026289", "2026290", "2026291", "2026292", "2026294", 
+            "2026296", "2026297", "2026302", "2026303", "2026304", "2026305", "2026306", "2026307", "2026308", "2026309", 
+            "2026311", "2026313", "2026318", "2026319", "2026321", "2026324", "2026325", "2026326", "2026329", "2026333", 
+            "2026337", "2026339", "2026340", "2026342", "2026344", "2026346", "2026350", "2026355", "2026356", "2026357", 
+            "2026359", "2026361", "2026366", "2026367", "2026369", "2026372", "2026375", "2026378", "2026379", "2026382", 
+            "2026383", "2026392", "2026393", "2026394", "2026396", "2026397", "2026399", "2026400", "2026401", "2026402", 
+            "2026404", "2026406", "2026409", "2026410", "2026411", "2026412", "2026413", "2026415", "2026416", "2026418", 
+            "2026420", "2026421", "2026422", "2026423", "2026426", "2026432", "2026433", "2026434", "2026435"
+        ];
 
         const studentsNames = [
             "ابتهال ضياء غضبان عبد الحسن", "ابرار عبد الرزاق انس عبد الرزاق", "ابرار عبدالله خليل عبد علي", "اثيل قاسم عبد فيصل", "احمد علي جاسم عبد الحسين عريبي", "اروى صباح نجم عبدالله", "اساور وسام فالح مهدي", "اسماء حازم كاظم بجاي", "اسيل عواد ربيد حمود", "اسيل هشام مجيد رشيد",
@@ -320,93 +292,95 @@
             "نور الهدى اسعد رشيد شاهين", "نور الهدى وسام شبر عبد العظيم", "نور رعد لطيف فتيح", "نور عمر محيل ناسي", "نور مهند كاظم جمعه", "هادي عماد جواد كاظم", "هبه هاشم طالب ناصر", "هديل احمد عثمان عمر", "هديل بشير خضير فايز", "هنا اسامة ناصر هاشم", "وديان حسين رياض عبود"
         ];
 
-        let studentsData = studentsNames.map((name, i) => ({
-            id: i + 1,
-            code: (2026260 + i).toString(),
-            name: name,
-            weeks: [1, 1, 1, 1, 1, 1, 1, 1]
-        }));
+        let studentsData = studentsNames.map((name, i) => {
+            const code = (2026260 + i).toString();
+            const group = groupACodes.includes(code) ? 'A' : 'B';
+            return { id: i + 1, code: code, name: name, group: group };
+        });
 
-        function renderTable() {
+        // ذاكرة مؤقتة لغيابات الأسبوع الحالي
+        let currentWeekAbsences = {}; // key: student_code -> status_value (0 = absent, 1 = present)
+
+        async function renderTable() {
             const tbody = document.getElementById('tableBody');
             if (!tbody) return;
             tbody.innerHTML = '';
 
+            const lectureType = document.getElementById('lectureTypeSelect').value;
+            const weekIndex = parseInt(document.getElementById('weekSelect').value);
+            const subject = document.getElementById('subjectSelect').value;
             const searchInput = document.getElementById('searchInput');
             const searchQuery = searchInput ? searchInput.value.trim().toLowerCase() : '';
 
-            let totalWarnings = 0;
-            let totalDropped = 0;
-            let totalPresenceSum = 0;
-            let totalPossibleMarks = studentsData.length * 8;
+            // جلب الغيابات من السحابة لهذا الأسبوع والمادة والنوع
+            if (supabaseClient && navigator.onLine) {
+                const { data, error } = await supabaseClient
+                    .from('attendance_records')
+                    .select('student_code, status_value')
+                    .eq('subject', subject)
+                    .eq('lecture_type', lectureType)
+                    .eq('week_index', weekIndex);
 
-            studentsData.forEach((student, index) => {
+                currentWeekAbsences = {};
+                if (data && !error) {
+                    data.forEach(item => {
+                        currentWeekAbsences[item.student_code] = item.status_value;
+                    });
+                }
+            }
+
+            let filteredStudents = studentsData;
+            if (lectureType === 'g1') {
+                filteredStudents = studentsData.filter(s => s.group === 'A');
+            } else if (lectureType === 'g2') {
+                filteredStudents = studentsData.filter(s => s.group === 'B');
+            }
+
+            filteredStudents.forEach((student, index) => {
                 if (searchQuery && !student.name.toLowerCase().includes(searchQuery) && !student.code.includes(searchQuery)) {
                     return;
                 }
 
-                const presentCount = student.weeks.reduce((a, b) => a + b, 0);
-                const absentCount = 8 - presentCount;
-                const absenceRate = (absentCount / 8) * 100;
-                totalPresenceSum += presentCount;
-
-                let statusHtml = absentCount <= 1 ? '<span class="text-green-400 font-semibold">منتظم</span>' :
-                               absentCount === 2 ? '<span class="text-yellow-400 font-semibold">تنبيه أول</span>' :
-                               absentCount === 3 ? '<span class="text-orange-400 font-semibold">إنذار نهائي</span>' :
-                               '<span class="text-red-400 font-semibold">محروم</span>';
-
-                if(absentCount === 2 || absentCount === 3) totalWarnings++;
-                if(absentCount >= 4) totalDropped++;
+                // الافتراضي حاضر (1)، إذا كان مخزناً كـ 0 فهو غائب
+                const isAbsent = currentWeekAbsences[student.code] === 0;
 
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-gray-800 transition";
-
-                let weeksHtml = '';
-                student.weeks.forEach((val, wIndex) => {
-                    const badgeClass = val === 1 ? 'bg-green-600 text-white hover:bg-green-700' : 'bg-red-600 text-white hover:bg-red-700';
-                    weeksHtml += `
-                        <td class="p-2 text-center">
-                            <button onclick="toggleAttendance(${index}, ${wIndex})" class="w-8 h-8 rounded-lg font-bold text-xs transition shadow ${badgeClass}">
-                                ${val}
-                            </button>
-                        </td>
-                    `;
-                });
 
                 tr.innerHTML = `
                     <td class="p-3 text-center font-mono text-gray-400">${index + 1}</td>
                     <td class="p-3 font-mono text-blue-400 text-xs">${student.code}</td>
                     <td class="p-3 font-medium text-white">${student.name}</td>
-                    ${weeksHtml}
-                    <td class="p-3 text-center font-semibold text-green-400">${presentCount}</td>
-                    <td class="p-3 text-center font-semibold text-red-400">${absentCount}</td>
-                    <td class="p-3 text-center font-mono text-gray-300">${absenceRate.toFixed(1)}%</td>
-                    <td class="p-3 text-center">${statusHtml}</td>
+                    <td class="p-3 text-center font-semibold text-yellow-400">Group ${student.group}</td>
+                    <td class="p-3 text-center">
+                        <label class="inline-flex items-center cursor-pointer">
+                            <input type="checkbox" ${isAbsent ? 'checked' : ''} onchange="toggleAbsence('${student.code}', this.checked)" class="w-5 h-5 text-red-600 bg-gray-900 border-gray-600 rounded focus:ring-red-500 cursor-pointer">
+                            <span class="mr-2 text-xs font-bold ${isAbsent ? 'text-red-400' : 'text-gray-500'}">${isAbsent ? 'غائب' : 'حاضر'}</span>
+                        </label>
+                    </td>
                 `;
                 tbody.appendChild(tr);
             });
-
-            document.getElementById('totalStudents').innerText = studentsData.length;
-            document.getElementById('warningCount').innerText = totalWarnings;
-            document.getElementById('droppedCount').innerText = totalDropped;
-            document.getElementById('avgAttendance').innerText = ((totalPresenceSum / totalPossibleMarks) * 100).toFixed(1) + '%';
         }
 
-        async function toggleAttendance(studentIndex, weekIndex) {
-            const student = studentsData[studentIndex];
-            student.weeks[weekIndex] = student.weeks[weekIndex] === 1 ? 0 : 1;
-            renderTable();
+        async function toggleAbsence(studentCode, isChecked) {
+            const student = studentsData.find(s => s.code === studentCode);
+            if (!student) return;
+
+            const statusValue = isChecked ? 0 : 1; // 0 = غائب، 1 = حاضر
+            currentWeekAbsences[studentCode] = statusValue;
 
             const subject = document.getElementById('subjectSelect').value;
             const lectureType = document.getElementById('lectureTypeSelect').value;
+            const weekIndex = parseInt(document.getElementById('weekSelect').value);
 
             const payload = {
                 student_code: student.code,
                 student_name: student.name,
                 subject: subject,
                 lecture_type: lectureType,
-                week_index: weekIndex + 1,
-                status_value: student.weeks[weekIndex],
+                week_index: weekIndex,
+                status_value: statusValue,
                 updated_at: new Date().toISOString()
             };
 
@@ -414,19 +388,15 @@
 
             if (supabaseClient && navigator.onLine) {
                 try {
-                    const { data, error } = await supabaseClient
+                    await supabaseClient
                         .from('attendance_records')
                         .upsert([payload], { onConflict: 'student_code,subject,lecture_type,week_index' });
-                    
-                    if (error) {
-                        console.error("❌ Supabase Error:", error.message, error.details);
-                    } else {
-                        console.log("✅ Synced successfully to Supabase with student name!");
-                    }
+                    console.log("✅ Attendance synced!");
                 } catch (e) {
-                    console.error("❌ Exception during sync:", e);
+                    console.error("Sync error", e);
                 }
             }
+            renderTable();
         }
 
         function saveToLocalQueue(payload) {
@@ -441,36 +411,23 @@
             localStorage.setItem('ki_offline_queue', JSON.stringify(queue));
         }
 
-        async function syncOfflineQueue() {
-            if (!supabaseClient) return;
-            let queue = JSON.parse(localStorage.getItem('ki_offline_queue') || '[]');
-            if (queue.length > 0) {
-                const { error } = await supabaseClient.from('attendance_records').upsert(queue, { onConflict: 'student_code,subject,lecture_type,week_index' });
-                if (!error) {
-                    localStorage.removeItem('ki_offline_queue');
-                }
-            }
-        }
-
         function exportToCSV() {
-            let csvContent = "\uFEFFالتسلسل,كود الطالب,اسم الطالب,أسبوع 1,أسبوع 2,أسبوع 3,أسبوع 4,أسبوع 5,أسبوع 6,أسبوع 7,أسبوع 8,إجمالي الحضور,إجمالي الغياب,نسبة الغياب\n";
-            studentsData.forEach((s, idx) => {
-                const present = s.weeks.reduce((a,b)=>a+b,0);
-                const absent = 8 - present;
-                const rate = ((absent/8)*100).toFixed(1) + '%';
-                csvContent += `${idx+1},${s.code},"${s.name}",${s.weeks.join(',')},${present},${absent},${rate}\n`;
+            let csvContent = "\uFEFFالكود,اسم الطالب,المجموعة,الحالة\n";
+            studentsData.forEach((s) => {
+                const status = currentWeekAbsences[s.code] === 0 ? 'غائب' : 'حاضر';
+                csvContent += `${s.code},"${s.name}",Group ${s.group},${status}\n`;
             });
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.setAttribute('href', url);
-            a.setAttribute('download', `ki_attendance_report.csv`);
+            a.setAttribute('download', `ki_attendance_week.csv`);
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
         }
 
-        // تشغيل واختبار الحماية
+        // تشغيل مباشر
         checkAuth();
         renderTable();
     </script>
