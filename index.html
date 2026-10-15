@@ -98,7 +98,7 @@
                     <option value="g1">🟡 عملي - Group A</option>
                     <option value="g2">🟡 عملي - Group B</option>
                 </select>
-                <!-- قائمة الأسابيع (1 إلى 15) -->
+                <!-- قائمة الأسابيع (1 إلى 15 أسبوعاً فعلياً) -->
                 <select id="weekSelect" onchange="renderTable()" class="bg-gray-700 border border-gray-600 rounded-lg px-3 py-1.5 text-xs font-bold text-blue-400">
                 </select>
                 <button id="addAdminBtn" onclick="openAddAdminModal()" class="hidden bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 shadow">
@@ -125,7 +125,7 @@
         <div class="bg-gray-800 rounded-2xl border border-gray-700 shadow-xl overflow-hidden">
             <div class="p-4 border-b border-gray-700 bg-orange-900/30 flex justify-between items-center">
                 <h2 class="text-base font-bold flex items-center gap-2">
-                    <i class="fa-solid fa-table-cells text-orange-400"></i> سجل المتابعة والغياب (15 أسبوعاً - نسبة من 30 أسبوعاً)
+                    <i class="fa-solid fa-table-cells text-orange-400"></i> سجل المتابعة والغياب (15 أسبوعاً)
                 </h2>
                 <span id="currentUserBadge" class="text-xs font-mono text-blue-400 bg-blue-950/80 px-3 py-1 rounded-lg border border-blue-800/50"></span>
             </div>
@@ -139,7 +139,7 @@
                             <th class="p-3 text-center">المجموعة</th>
                             <th class="p-3 text-center bg-red-950/50 text-red-300">تسجيل غياب (الأسبوع المختار)</th>
                             <th class="p-3 text-center">إجمالي الغياب</th>
-                            <th class="p-3 text-center">نسبة الغياب (من أساس 30)</th>
+                            <th class="p-3 text-center">نسبة الغياب (من 15 أسبوعاً)</th>
                             <th class="p-3 text-center">الموقف / الإنذار</th>
                         </tr>
                     </thead>
@@ -166,7 +166,7 @@
             console.log('Local Mode Active', e);
         }
 
-        // قائمة الأسابيع (1 إلى 15)
+        // تعبئة قائمة الأسبوع (1 إلى 15 أسبوعاً فعلياً)
         const weekSelect = document.getElementById('weekSelect');
         for (let i = 1; i <= 15; i++) {
             const opt = document.createElement('option');
@@ -351,8 +351,8 @@
                     }
                 });
 
-                // الاحتساب رياضياً على أساس 30 أسبوعاً إجمالياً
-                const absenceRate = (totalAbsentCount / 30) * 100;
+                // الاحتساب رياضياً على أساس 15 أسبوعاً فعلياً
+                const absenceRate = (totalAbsentCount / 15) * 100;
 
                 let statusHtml = '<span class="text-green-400 font-semibold">منتظم</span>';
                 if (absenceRate >= 20) {
