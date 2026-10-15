@@ -235,8 +235,10 @@
             const subject = document.getElementById('subjectSelect').value;
             const lectureType = document.getElementById('lectureTypeSelect').value;
 
+            // إرسال كود الطالب واسمه الثلاثي مع كل تعديل
             const payload = {
                 student_code: student.code,
+                student_name: student.name,
                 subject: subject,
                 lecture_type: lectureType,
                 week_index: weekIndex + 1,
@@ -255,7 +257,7 @@
                     if (error) {
                         console.error("❌ Supabase Error:", error.message, error.details);
                     } else {
-                        console.log("✅ Synced successfully to Supabase!");
+                        console.log("✅ Synced successfully to Supabase with student name!");
                     }
                 } catch (e) {
                     console.error("❌ Exception during sync:", e);
