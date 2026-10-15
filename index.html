@@ -41,14 +41,14 @@
                 <div class="flex items-center gap-2">
                     <label class="text-xs font-medium text-gray-300">المادة:</label>
                     <select id="subjectSelect" class="bg-gray-700 border border-gray-600 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-blue-500 text-white">
-                        <option>Basic of Anesthesia (1)[cite: 16]</option>
-                        <option>Basic of Anesthesia Equipments (1)[cite: 16]</option>
-                        <option>Basic of Surgery (1)[cite: 16]</option>
-                        <option>Basic of Medicine (1)[cite: 16]</option>
-                        <option>Applied Physiology (1)[cite: 16]</option>
-                        <option>Pharmacology (1)[cite: 16]</option>
+                        <option>Basic of Anesthesia (1)</option>
+                        <option>Basic of Anesthesia Equipments (1)</option>
+                        <option>Basic of Surgery (1)</option>
+                        <option>Basic of Medicine (1)</option>
+                        <option>Applied Physiology (1)</option>
+                        <option>Pharmacology (1)</option>
                         <option>Computer & AI (نظري فقط)</option>
-                        <option>جرائم البعث[cite: 16]</option>
+                        <option>جرائم البعث</option>
                     </select>
                 </div>
 
@@ -73,7 +73,7 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             <div class="bg-gray-800 p-4 rounded-xl border border-gray-700 shadow-sm">
                 <p class="text-sm text-gray-400">إجمالي الطلبة في السجل</p>
-                <h3 class="text-2xl font-bold mt-1 text-white" id="totalStudents">181[cite: 15]</h3>
+                <h3 class="text-2xl font-bold mt-1 text-white" id="totalStudents">181</h3>
             </div>
             <div class="bg-gray-800 p-4 rounded-xl border border-gray-700 shadow-sm">
                 <p class="text-sm text-gray-400">متوسط نسب الحضور العامة</p>
@@ -136,12 +136,11 @@
 
     <!-- Footer -->
     <footer class="bg-gray-800 border-t border-gray-700 py-4 text-center text-xs text-gray-400">
-        <p>Ki Integrated Attendance System &bull; Designed & Developed by <span class="text-blue-400 font-bold">ki</span> &bull; All Rights Reserved © 2026[cite: 15]</p>
+        <p>Ki Integrated Attendance System &bull; Designed & Developed by <span class="text-blue-400 font-bold">ki</span> &bull; All Rights Reserved © 2026</p>
     </footer>
 
     <!-- Scripts & Logic -->
     <script>
-        // تسجيل Service Worker بأمان تام
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js').catch(() => {});
@@ -173,7 +172,6 @@
         window.addEventListener('online', () => { updateConnectionStatus("متصل (Online)", true); syncOfflineQueue(); });
         window.addEventListener('offline', () => updateConnectionStatus("غير متصل (Offline)", false));
 
-        // قائمة الطلاب (181 طالباً)[cite: 15]
         const studentsNames = [
             "ابتهال ضياء غضبان عبد الحسن", "ابرار عبد الرزاق انس عبد الرزاق", "ابرار عبدالله خليل عبد علي", "اثيل قاسم عبد فيصل", "احمد علي جاسم عبد الحسين عريبي", "اروى صباح نجم عبدالله", "اساور وسام فالح مهدي", "اسماء حازم كاظم بجاي", "اسيل عواد ربيد حمود", "اسيل هشام مجيد رشيد",
             "افنان مضر كامل سلمان", "الكوثر محمد خلف احمد", "ام البنين جمعه عبد العباس علوان", "ام البنين عبدالرضا عبدالرزاق عذيب", "ام البنين كريم جبار فهد", "ام البنين مصطفى عليوي وادي", "ايات غني بهلول عبدالحسن", "ايلاف علي قاسم عشاو", "ايه امجد عزيز زغير", "ايه شعبان فالح نعمه",
@@ -331,17 +329,6 @@
             localStorage.setItem('ki_offline_queue', JSON.stringify(queue));
         }
 
-        async function syncOfflineQueue() {
-            if (!supabase) return;
-            let queue = JSON.parse(localStorage.getItem('ki_offline_queue') || '[]');
-            if (queue.length > 0) {
-                const { error } = await supabase.from('attendance_records').upsert(queue, { onConflict: 'student_code,subject,lecture_type,week_index' });
-                if (!error) {
-                    localStorage.removeItem('ki_offline_queue');
-                }
-            }
-        }
-
         function exportToCSV() {
             let csvContent = "\uFEFFالتسلسل,كود الطالب,اسم الطالب,أسبوع 1,أسبوع 2,أسبوع 3,أسبوع 4,أسبوع 5,أسبوع 6,أسبوع 7,أسبوع 8,إجمالي الحضور,إجمالي الغياب,نسبة الغياب\n";
             studentsData.forEach((s, idx) => {
@@ -360,17 +347,9 @@
             document.body.removeChild(a);
         }
 
-        // تشغيل آمن ومضمون فور جاهزية المستند بالكامل
-        function initSystem() {
-            renderTable();
-            updateTheme();
-        }
-
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initSystem);
-        } else {
-            initSystem();
-        }
+        // تشغيل فوري وآمن
+        renderTable();
+        updateTheme();
     </script>
 </body>
 </html>
