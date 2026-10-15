@@ -108,7 +108,7 @@
     </footer>
 
     <script>
-        // إعدادات اتصال Supabase المتكاملة والمباشرة
+        // إعدادات اتصال Supabase
         const SUPABASE_URL = 'https://wzwqfvdxsnswfzqcgykd.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_UuOYGMXtWeiOBClsHPFrZA_tvnq6PDQ';
         let supabaseClient = null;
@@ -248,9 +248,17 @@
 
             if (supabaseClient && navigator.onLine) {
                 try {
-                    await supabaseClient.from('attendance_records').upsert([payload], { onConflict: 'student_code,subject,lecture_type,week_index' });
+                    const { data, error } = await supabaseClient
+                        .from('attendance_records')
+                        .upsert([payload], { onConflict: 'student_code,subject,lecture_type,week_index' });
+                    
+                    if (error) {
+                        console.error("❌ Supabase Error:", error.message, error.details);
+                    } else {
+                        console.log("✅ Synced successfully to Supabase!");
+                    }
                 } catch (e) {
-                    console.log('Cloud sync pending');
+                    console.error("❌ Exception during sync:", e);
                 }
             }
         }
