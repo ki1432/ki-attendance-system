@@ -6,6 +6,8 @@
     <title>نظام غيابات المرحلة الثانية - تقنيات التخدير | Ki-ATTEND</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- استدعاء مكتبة Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap');
         body { font-family: 'Cairo', sans-serif; }
@@ -106,6 +108,32 @@
     </footer>
 
     <script>
+        // إعدادات اتصال Supabase المتكاملة والمباشرة
+        const SUPABASE_URL = 'https://wzwqfvdxsnswfzqcgykd.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_UuOYGMXtWeiOBClsHPFrZA_tvnq6PDQ';
+        let supabaseClient = null;
+
+        try {
+            if (window.supabase && SUPABASE_URL.startsWith('http')) {
+                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            }
+        } catch (e) {
+            console.log('Local Mode Active', e);
+        }
+
+        function updateConnectionStatus(msg, isOnline) {
+            const statusEl = document.getElementById('connection-status');
+            if (statusEl) {
+                statusEl.innerText = msg;
+                statusEl.className = isOnline 
+                    ? "px-3 py-1.5 rounded-lg text-xs font-semibold bg-green-600 text-white shadow" 
+                    : "px-3 py-1.5 rounded-lg text-xs font-semibold bg-yellow-600 text-white shadow";
+            }
+        }
+
+        window.addEventListener('online', () => { updateConnectionStatus("متصل (Online)", true); syncOfflineQueue(); });
+        window.addEventListener('offline', () => updateConnectionStatus("غير متصل (Offline)", false));
+
         const studentsNames = [
             "ابتهال ضياء غضبان عبد الحسن", "ابرار عبد الرزاق انس عبد الرزاق", "ابرار عبدالله خليل عبد علي", "اثيل قاسم عبد فيصل", "احمد علي جاسم عبد الحسين عريبي", "اروى صباح نجم عبدالله", "اساور وسام فالح مهدي", "اسماء حازم كاظم بجاي", "اسيل عواد ربيد حمود", "اسيل هشام مجيد رشيد",
             "افنان مضر كامل سلمان", "الكوثر محمد خلف احمد", "ام البنين جمعه عبد العباس علوان", "ام البنين عبدالرضا عبدالرزاق عذيب", "ام البنين كريم جبار فهد", "ام البنين مصطفى عليوي وادي", "ايات غني بهلول عبدالحسن", "ايلاف علي قاسم عشاو", "ايه امجد عزيز زغير", "ايه شعبان فالح نعمه",
@@ -142,6 +170,11 @@
             const searchInput = document.getElementById('searchInput');
             const searchQuery = searchInput ? searchInput.value.trim().toLowerCase() : '';
 
+            let totalWarnings = 0;
+            let totalDropped = 0;
+            let totalPresenceSum = 0;
+            let totalPossibleMarks = studentsData.length * 8;
+
             studentsData.forEach((student, index) => {
                 if (searchQuery && !student.name.toLowerCase().includes(searchQuery) && !student.code.includes(searchQuery)) {
                     return;
@@ -149,19 +182,23 @@
 
                 const presentCount = student.weeks.reduce((a, b) => a + b, 0);
                 const absentCount = 8 - presentCount;
-                const absenceRate = ((absentCount / 8) * 100).toFixed(1) + '%';
+                const absenceRate = (absentCount / 8) * 100;
+                totalPresenceSum += presentCount;
 
                 let statusHtml = absentCount <= 1 ? '<span class="text-green-400 font-semibold">منتظم</span>' :
                                absentCount === 2 ? '<span class="text-yellow-400 font-semibold">تنبيه أول</span>' :
                                absentCount === 3 ? '<span class="text-orange-400 font-semibold">إنذار نهائي</span>' :
                                '<span class="text-red-400 font-semibold">محروم</span>';
 
+                if(absentCount === 2 || absentCount === 3) totalWarnings++;
+                if(absentCount >= 4) totalDropped++;
+
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-gray-800 transition";
 
                 let weeksHtml = '';
                 student.weeks.forEach((val, wIndex) => {
-                    const badgeClass = val === 1 ? 'bg-green-600 text-white' : 'bg-red-600 text-white';
+                    const badgeClass = val === 1 ? 'bg-green-600 text-white hover:bg-green-700' : 'bg-red-600 text-white hover:bg-red-700';
                     weeksHtml += `
                         <td class="p-2 text-center">
                             <button onclick="toggleAttendance(${index}, ${wIndex})" class="w-8 h-8 rounded-lg font-bold text-xs transition shadow ${badgeClass}">
@@ -178,16 +215,67 @@
                     ${weeksHtml}
                     <td class="p-3 text-center font-semibold text-green-400">${presentCount}</td>
                     <td class="p-3 text-center font-semibold text-red-400">${absentCount}</td>
-                    <td class="p-3 text-center font-mono text-gray-300">${absenceRate}</td>
+                    <td class="p-3 text-center font-mono text-gray-300">${absenceRate.toFixed(1)}%</td>
                     <td class="p-3 text-center">${statusHtml}</td>
                 `;
                 tbody.appendChild(tr);
             });
+
+            document.getElementById('totalStudents').innerText = studentsData.length;
+            document.getElementById('warningCount').innerText = totalWarnings;
+            document.getElementById('droppedCount').innerText = totalDropped;
+            document.getElementById('avgAttendance').innerText = ((totalPresenceSum / totalPossibleMarks) * 100).toFixed(1) + '%';
         }
 
-        function toggleAttendance(studentIndex, weekIndex) {
-            studentsData[studentIndex].weeks[weekIndex] = studentsData[studentIndex].weeks[weekIndex] === 1 ? 0 : 1;
+        async function toggleAttendance(studentIndex, weekIndex) {
+            const student = studentsData[studentIndex];
+            student.weeks[weekIndex] = student.weeks[weekIndex] === 1 ? 0 : 1;
             renderTable();
+
+            const subject = document.getElementById('subjectSelect').value;
+            const lectureType = document.getElementById('lectureTypeSelect').value;
+
+            const payload = {
+                student_code: student.code,
+                subject: subject,
+                lecture_type: lectureType,
+                week_index: weekIndex + 1,
+                status_value: student.weeks[weekIndex],
+                updated_at: new Date().toISOString()
+            };
+
+            saveToLocalQueue(payload);
+
+            if (supabaseClient && navigator.onLine) {
+                try {
+                    await supabaseClient.from('attendance_records').upsert([payload], { onConflict: 'student_code,subject,lecture_type,week_index' });
+                } catch (e) {
+                    console.log('Cloud sync pending');
+                }
+            }
+        }
+
+        function saveToLocalQueue(payload) {
+            let queue = JSON.parse(localStorage.getItem('ki_offline_queue') || '[]');
+            queue = queue.filter(item => 
+                !(item.student_code === payload.student_code && 
+                  item.subject === payload.subject && 
+                  item.lecture_type === payload.lecture_type && 
+                  item.week_index === payload.week_index)
+            );
+            queue.push(payload);
+            localStorage.setItem('ki_offline_queue', JSON.stringify(queue));
+        }
+
+        async function syncOfflineQueue() {
+            if (!supabaseClient) return;
+            let queue = JSON.parse(localStorage.getItem('ki_offline_queue') || '[]');
+            if (queue.length > 0) {
+                const { error } = await supabaseClient.from('attendance_records').upsert(queue, { onConflict: 'student_code,subject,lecture_type,week_index' });
+                if (!error) {
+                    localStorage.removeItem('ki_offline_queue');
+                }
+            }
         }
 
         function exportToCSV() {
