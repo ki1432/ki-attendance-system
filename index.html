@@ -15,6 +15,64 @@
 </head>
 <body class="bg-gray-900 text-gray-100 min-h-screen flex flex-col justify-between">
 
+    <!-- 🔒 شاشة تسجيل الدخول -->
+    <div id="loginScreen" class="fixed inset-0 z-50 bg-gray-900 flex items-center justify-center p-4">
+        <div class="bg-gray-800 border border-gray-700 rounded-2xl p-6 lg:p-8 w-full max-w-md shadow-2xl">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 bg-blue-600/20 text-blue-400 rounded-2xl flex items-center justify-center mx-auto mb-3 text-2xl border border-blue-500/30">
+                    <i class="fa-solid fa-user-shield"></i>
+                </div>
+                <h2 class="text-xl font-bold text-white">تسجيل الدخول - Ki-ATTEND</h2>
+                <p class="text-xs text-gray-400 mt-1">يرجى إدخال اسم المستخدم وكلمة المرور للمتابعة</p>
+            </div>
+            <form onsubmit="handleLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-300 mb-1">اسم المستخدم</label>
+                    <input type="text" id="loginUsername" required placeholder="ادخل اسم المستخدم..." 
+                           class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-300 mb-1">كلمة المرور</label>
+                    <input type="password" id="loginPassword" required placeholder="••••••••" 
+                           class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
+                </div>
+                <p id="loginError" class="text-xs text-red-400 hidden font-semibold text-center"></p>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-lg text-sm transition shadow-lg">
+                    دخول إلى النظام
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ➕ نافذة (Modal) إضافة مشرف جديد -->
+    <div id="addAdminModal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="bg-gray-800 border border-gray-700 rounded-2xl p-6 w-full max-w-sm shadow-2xl">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-base font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-user-plus text-green-400"></i> إضافة مشرف جديد
+                </h3>
+                <button onclick="closeAddAdminModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form onsubmit="handleAddAdmin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-300 mb-1">اسم المستخدم الجديد</label>
+                    <input type="text" id="newAdminUsername" required placeholder="اسم المشرف..." 
+                           class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-300 mb-1">كلمة المرور</label>
+                    <input type="password" id="newAdminPassword" required placeholder="••••••••" 
+                           class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500">
+                </div>
+                <p id="adminModalMsg" class="text-xs hidden font-semibold text-center"></p>
+                <div class="flex gap-2">
+                    <button type="submit" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-2 rounded-lg text-xs transition">حفظ المشرف</button>
+                    <button type="button" onclick="closeAddAdminModal()" class="bg-gray-700 hover:bg-gray-600 text-gray-200 font-bold px-4 py-2 rounded-lg text-xs">إلغاء</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Header -->
     <header class="bg-gray-800 border-b border-gray-700 shadow-lg p-4">
         <div class="container mx-auto flex flex-col lg:flex-row justify-between items-center gap-4">
@@ -26,6 +84,9 @@
                 <div id="connection-status" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-green-600 text-white shadow">
                     متصل (Online)
                 </div>
+                <button id="addAdminBtn" onclick="openAddAdminModal()" class="hidden bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 shadow">
+                    <i class="fa-solid fa-user-plus"></i> إضافة مشرف
+                </button>
                 <select id="subjectSelect" class="bg-gray-700 border border-gray-600 rounded-lg px-3 py-1.5 text-xs text-white">
                     <option>Basic of Anesthesia (1)</option>
                     <option>Basic of Anesthesia Equipments (1)</option>
@@ -43,6 +104,9 @@
                 </select>
                 <button onclick="exportToCSV()" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 shadow">
                     <i class="fa-solid fa-file-excel"></i> تصدير Excel
+                </button>
+                <button onclick="handleLogout()" class="bg-red-600/80 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 shadow">
+                    <i class="fa-solid fa-right-from-bracket"></i> خروج
                 </button>
             </div>
         </div>
@@ -82,6 +146,7 @@
                 <h2 class="text-base font-bold flex items-center gap-2">
                     <i class="fa-solid fa-table-cells text-orange-400"></i> سجل المتابعة الأسبوعية
                 </h2>
+                <span id="currentUserBadge" class="text-xs font-mono text-blue-400 bg-blue-950/80 px-3 py-1 rounded-lg border border-blue-800/50"></span>
             </div>
             <div class="overflow-x-auto max-h-[550px] overflow-y-auto">
                 <table class="w-full text-right border-collapse">
@@ -108,7 +173,6 @@
     </footer>
 
     <script>
-        // إعدادات اتصال Supabase
         const SUPABASE_URL = 'https://wzwqfvdxsnswfzqcgykd.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_UuOYGMXtWeiOBClsHPFrZA_tvnq6PDQ';
         let supabaseClient = null;
@@ -119,6 +183,107 @@
             }
         } catch (e) {
             console.log('Local Mode Active', e);
+        }
+
+        // إدارة الجلسة وتسجيل الدخول
+        let currentUser = JSON.parse(sessionStorage.getItem('ki_user') || 'null');
+
+        function checkAuth() {
+            const loginScreen = document.getElementById('loginScreen');
+            const addAdminBtn = document.getElementById('addAdminBtn');
+            const currentUserBadge = document.getElementById('currentUserBadge');
+
+            if (!currentUser) {
+                loginScreen.classList.remove('hidden');
+            } else {
+                loginScreen.classList.add('hidden');
+                if (currentUserBadge) currentUserBadge.innerText = `المشرف الحالي: ${currentUser.username}`;
+                
+                // زر إضافة المشرفين يظهر فقط للحساب الرئيسي KI
+                if (currentUser.username.toUpperCase() === 'KI' && addAdminBtn) {
+                    addAdminBtn.classList.remove('hidden');
+                } else if (addAdminBtn) {
+                    addAdminBtn.classList.add('hidden');
+                }
+            }
+        }
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            const userIn = document.getElementById('loginUsername').value.trim();
+            const passIn = document.getElementById('loginPassword').value.trim();
+            const errEl = document.getElementById('loginError');
+
+            errEl.classList.add('hidden');
+
+            // 1. التحقق السريع من حساب KI الرئيسي
+            if (userIn.toUpperCase() === 'KI' && passIn === '211621') {
+                currentUser = { username: 'KI', role: 'super_admin' };
+                sessionStorage.setItem('ki_user', JSON.stringify(currentUser));
+                checkAuth();
+                return;
+            }
+
+            // 2. التحقق من بقية المشرفين عبر Supabase
+            if (supabaseClient) {
+                const { data, error } = await supabaseClient
+                    .from('app_admins')
+                    .select('*')
+                    .eq('username', userIn)
+                    .eq('password', passIn)
+                    .single();
+
+                if (data && !error) {
+                    currentUser = { username: data.username, role: data.role };
+                    sessionStorage.setItem('ki_user', JSON.stringify(currentUser));
+                    checkAuth();
+                    return;
+                }
+            }
+
+            errEl.innerText = "اسم المستخدم أو كلمة المرور غير صحيحة!";
+            errEl.classList.remove('hidden');
+        }
+
+        function handleLogout() {
+            sessionStorage.removeItem('ki_user');
+            currentUser = null;
+            checkAuth();
+        }
+
+        // نافذة إضافة مشرف جديد
+        function openAddAdminModal() { document.getElementById('addAdminModal').classList.remove('hidden'); }
+        function closeAddAdminModal() { document.getElementById('addAdminModal').classList.add('hidden'); }
+
+        async function handleAddAdmin(e) {
+            e.preventDefault();
+            const newU = document.getElementById('newAdminUsername').value.trim();
+            const newP = document.getElementById('newAdminPassword').value.trim();
+            const msgEl = document.getElementById('adminModalMsg');
+
+            if (!supabaseClient) {
+                alert("Supabase غير متصل حالياً!");
+                return;
+            }
+
+            const { error } = await supabaseClient
+                .from('app_admins')
+                .insert([{ username: newU, password: newP, role: 'admin' }]);
+
+            msgEl.classList.remove('hidden');
+            if (error) {
+                msgEl.innerText = "فشل الإضافة! قد يكون الاسم مكرراً.";
+                msgEl.className = "text-xs font-semibold text-center text-red-400";
+            } else {
+                msgEl.innerText = "تمت إضافة المشرف بنجاح!";
+                msgEl.className = "text-xs font-semibold text-center text-green-400";
+                setTimeout(() => {
+                    closeAddAdminModal();
+                    document.getElementById('newAdminUsername').value = '';
+                    document.getElementById('newAdminPassword').value = '';
+                    msgEl.classList.add('hidden');
+                }, 1200);
+            }
         }
 
         function updateConnectionStatus(msg, isOnline) {
@@ -235,7 +400,6 @@
             const subject = document.getElementById('subjectSelect').value;
             const lectureType = document.getElementById('lectureTypeSelect').value;
 
-            // إرسال كود الطالب واسمه الثلاثي مع كل تعديل
             const payload = {
                 student_code: student.code,
                 student_name: student.name,
@@ -306,7 +470,8 @@
             document.body.removeChild(a);
         }
 
-        // تشغيل مباشر
+        // تشغيل واختبار الحماية
+        checkAuth();
         renderTable();
     </script>
 </body>
