@@ -83,7 +83,6 @@
                 <div id="connection-status" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-green-600 text-white shadow">
                     متصل
                 </div>
-                <!-- اختيار المادة -->
                 <select id="subjectSelect" onchange="renderTable()" class="bg-gray-700 border border-gray-600 rounded-lg px-3 py-1.5 text-xs text-white font-medium">
                     <option>Basic of Anesthesia (1)</option>
                     <option>Basic of Anesthesia Equipments (1)</option>
@@ -94,13 +93,11 @@
                     <option>Computer & AI (نظري فقط)</option>
                     <option>جرائم البعث</option>
                 </select>
-                <!-- نوع المحاضرة -->
                 <select id="lectureTypeSelect" onchange="renderTable()" class="bg-gray-700 border border-gray-600 rounded-lg px-3 py-1.5 text-xs font-bold text-white">
                     <option value="theory">🟠 نظري (المرحلة كاملة)</option>
                     <option value="g1">🟡 عملي - Group A</option>
                     <option value="g2">🟡 عملي - Group B</option>
                 </select>
-                <!-- اختيار الأسبوع (1 إلى 15) -->
                 <select id="weekSelect" onchange="renderTable()" class="bg-gray-700 border border-gray-600 rounded-lg px-3 py-1.5 text-xs font-bold text-blue-400">
                 </select>
                 <button id="addAdminBtn" onclick="openAddAdminModal()" class="hidden bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 shadow">
@@ -118,18 +115,16 @@
 
     <!-- Main Content -->
     <main class="container mx-auto px-4 py-6 flex-grow">
-        <!-- Live Search -->
         <div class="mb-4 bg-gray-800 p-3 rounded-xl border border-gray-700 shadow flex items-center gap-3">
             <i class="fa-solid fa-magnifying-glass text-blue-400"></i>
             <input type="text" id="searchInput" oninput="renderTable()" placeholder="ابحث عن اسم الطالب أو الكود الجامعي..." 
                    class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-sm text-white focus:outline-none focus:border-blue-500">
         </div>
 
-        <!-- Table -->
         <div class="bg-gray-800 rounded-2xl border border-gray-700 shadow-xl overflow-hidden">
             <div class="p-4 border-b border-gray-700 bg-orange-900/30 flex justify-between items-center">
                 <h2 class="text-base font-bold flex items-center gap-2">
-                    <i class="fa-solid fa-table-cells text-orange-400"></i> سجل المتابعة والغياب (15 أسبوعاً)
+                    <i class="fa-solid fa-table-cells text-orange-400"></i> سجل المتابعة والغياب (بفرض 30 أسبوعاً)
                 </h2>
                 <span id="currentUserBadge" class="text-xs font-mono text-blue-400 bg-blue-950/80 px-3 py-1 rounded-lg border border-blue-800/50"></span>
             </div>
@@ -143,7 +138,7 @@
                             <th class="p-3 text-center">المجموعة</th>
                             <th class="p-3 text-center bg-red-950/50 text-red-300">تسجيل غياب (الأسبوع المختار)</th>
                             <th class="p-3 text-center">إجمالي الغياب</th>
-                            <th class="p-3 text-center">نسبة الغياب</th>
+                            <th class="p-3 text-center">نسبة الغياب (من 30 أسبوعاً)</th>
                             <th class="p-3 text-center">الموقف / الإنذار</th>
                         </tr>
                     </thead>
@@ -170,9 +165,9 @@
             console.log('Local Mode Active', e);
         }
 
-        // تعبئة قائمة الأسبوع (1 إلى 15)
+        // تعبئة قائمة الأسبوع (1 إلى 30)
         const weekSelect = document.getElementById('weekSelect');
-        for (let i = 1; i <= 15; i++) {
+        for (let i = 1; i <= 30; i++) {
             const opt = document.createElement('option');
             opt.value = i;
             opt.innerText = `الأسبوع ${i}`;
@@ -310,7 +305,6 @@
             const searchInput = document.getElementById('searchInput');
             const searchQuery = searchInput ? searchInput.value.trim().toLowerCase() : '';
 
-            // جلب كافة سجلات المادة والنوع لحساب الإجماليات بدقة لـ 15 أسبوعاً
             let allRecords = [];
             if (supabaseClient && navigator.onLine) {
                 const { data, error } = await supabaseClient
@@ -324,14 +318,13 @@
                 }
             }
 
-            // تجميع الغيابات لكل طالب
-            let studentAbsencesMap = {}; // code -> set of absent weeks or count
+            let studentAbsencesMap = {}; 
             allRecords.forEach(rec => {
                 if (rec.status_value === 0) {
                     if (!studentAbsencesMap[rec.student_code]) {
                         studentAbsencesMap[rec.student_code] = {};
                     }
-                    studentAbsencesMap[rec.student_code][rec.week_index] = 0; // غائب
+                    studentAbsencesMap[rec.student_code][rec.week_index] = 0; 
                 }
             });
 
@@ -347,15 +340,19 @@
                     return;
                 }
 
-                // غياب الأسبوع الحالي المحدد
                 const studentWeeks = studentAbsencesMap[student.code] || {};
                 const isAbsentThisWeek = studentWeeks[currentWeek] === 0;
 
-                // إجمالي الغيابات من 15 أسبوعاً
-                const totalAbsentCount = Object.keys(studentWeeks).length;
-                const absenceRate = (totalAbsentCount / 15) * 100;
+                let totalAbsentCount = 0;
+                Object.keys(studentWeeks).forEach(w => {
+                    if (parseInt(w) <= 30) {
+                        totalAbsentCount++;
+                    }
+                });
 
-                // تحديد الموقف / الإنذار
+                // الاحتساب بناءً على إجمالي 30 أسبوعاً
+                const absenceRate = (totalAbsentCount / 30) * 100;
+
                 let statusHtml = '<span class="text-green-400 font-semibold">منتظم</span>';
                 if (absenceRate >= 20) {
                     statusHtml = '<span class="text-red-500 font-bold">فصل / محروم</span>';
@@ -381,7 +378,7 @@
                             <span class="mr-2 text-xs font-bold ${isAbsentThisWeek ? 'text-red-400' : 'text-gray-500'}">${isAbsentThisWeek ? 'غائب' : 'حاضر'}</span>
                         </label>
                     </td>
-                    <td class="p-3 text-center font-semibold text-red-400">${totalAbsentCount} أ أسابيع</td>
+                    <td class="p-3 text-center font-semibold text-red-400">${totalAbsentCount} أسبوع</td>
                     <td class="p-3 text-center font-mono text-gray-200">${absenceRate.toFixed(1)}%</td>
                     <td class="p-3 text-center">${statusHtml}</td>
                 `;
@@ -393,7 +390,7 @@
             const student = studentsData.find(s => s.code === studentCode);
             if (!student) return;
 
-            const statusValue = isChecked ? 0 : 1; // 0 = غائب، 1 = حاضر
+            const statusValue = isChecked ? 0 : 1; 
             const subject = document.getElementById('subjectSelect').value;
             const lectureType = document.getElementById('lectureTypeSelect').value;
             const weekIndex = parseInt(document.getElementById('weekSelect').value);
@@ -415,7 +412,6 @@
                     await supabaseClient
                         .from('attendance_records')
                         .upsert([payload], { onConflict: 'student_code,subject,lecture_type,week_index' });
-                    console.log("✅ Attendance synced successfully!");
                 } catch (e) {
                     console.error("Sync error", e);
                 }
@@ -450,7 +446,6 @@
             document.body.removeChild(a);
         }
 
-        // تشغيل مباشر
         checkAuth();
         renderTable();
     </script>
